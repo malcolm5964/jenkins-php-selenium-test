@@ -7,7 +7,9 @@ pipeline {
 					agent any
 					steps {
                         sh 'chmod +x ./jenkins/scripts/deploy.sh'
+
                         sh './jenkins/scripts/deploy.sh'
+						
                         script {
                             def containerIP = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-apache-php-app", returnStdout: true).trim()
                             echo "CONTAINER_IP is ${containerIP}"
