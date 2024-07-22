@@ -11,6 +11,9 @@ sleep 10
 
 docker ps
 
+CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-apache-php-app)
+echo "Container IP: $CONTAINER_IP"
+
 set +x
 
 echo 'Now...'
