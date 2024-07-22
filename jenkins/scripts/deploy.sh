@@ -1,11 +1,20 @@
 #!/usr/bin/env sh
 
+echo "Current working directory:"
+pwd
+echo "Contents of current directory:"
+ls -la
+
 set -x
+docker rm -f my-apache-php-app || true
 docker run -d -p 80:80 --name my-apache-php-app -v "$(pwd)/src":/var/www/html php:7.2-apache
 sleep 10
+
 docker ps
-docker logs my-apache-php-app
-curl http://localhost  # This will show if the app is accessible
+
+CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-apache-php-app)
+echo "Container IP: $CONTAINER_IP"
+
 set +x
 
 echo 'Now...'
