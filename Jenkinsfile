@@ -1,6 +1,8 @@
 pipeline {
 	agent none
-
+    environment {
+        CONTAINER_IP = ''
+    }
 	stages {
         stage('Integration Test') {
             parallel {
@@ -9,8 +11,10 @@ pipeline {
                     steps {
                         sh 'chmod +x ./jenkins/scripts/deploy.sh'
                         sh './jenkins/scripts/deploy.sh'
-                        input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                        sh './jenkins/scripts/kill.sh'
+                        script {
+                            CONTAINER_IP = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-apache-php-app", returnStdout: true).trim()
+                            echo "CONTAINER_IP is ${CONTAINER_IP}"
+                        }
                     }
                 }
                 stage('Headless Browser Test') {
@@ -22,7 +26,7 @@ pipeline {
                     }
                     steps {
                         sh 'mvn -B -DskipTests clean package'
-                        sh 'mvn test'
+                        sh "mvn test -Dapp.url=http://${CONTAINER_IP}"
                     }
                     post {
                         always {
