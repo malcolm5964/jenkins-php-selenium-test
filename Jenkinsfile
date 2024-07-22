@@ -2,22 +2,22 @@ pipeline {
 	agent none
 
 	stages {
-        stage('Integration Test') {
-            parallel {
+        stage('Integration UI Test') {
+            stages {
                 stage('Deploy') {
                     agent any
                     steps {
                         sh 'chmod +x ./jenkins/scripts/deploy.sh'
                         sh './jenkins/scripts/deploy.sh'
-                        input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                        sh './jenkins/scripts/kill.sh'
+                        sh 'docker ps'  // This will show running containers
+                        sh 'sleep 30'   // Give more time for the app to start
                     }
                 }
                 stage('Headless Browser Test') {
                     agent {
                         docker {
                             image 'maven:3-alpine'
-                            args '-v /root/.m2:/root/.m2'
+                            args '--network host -v /root/.m2:/root/.m2'
                         }
                     }
                     steps {
